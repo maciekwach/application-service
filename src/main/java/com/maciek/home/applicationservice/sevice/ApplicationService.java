@@ -24,4 +24,8 @@ public interface ApplicationService {
     boolean acceptById(Long id);
 
     boolean publishById(Long id);
+
+    List<Application> findAllOrderByName(String sort, int page);
+
+    List<Application> findAllOrderByState(String sort, int page);
 }

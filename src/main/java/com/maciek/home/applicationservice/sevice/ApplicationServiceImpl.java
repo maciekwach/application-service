@@ -3,15 +3,16 @@ package com.maciek.home.applicationservice.sevice;
 import com.maciek.home.applicationservice.model.Application;
 import com.maciek.home.applicationservice.model.State;
 import com.maciek.home.applicationservice.repositories.ApplicationRepository;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.rmi.ServerException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import static com.maciek.home.applicationservice.model.State.ACCEPTED;
 import static com.maciek.home.applicationservice.model.State.CREATED;
@@ -43,8 +44,40 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     public List<Application> findAll() {
+        return new ArrayList<>(repository.findAll());
+    }
 
-        return StreamSupport.stream(repository.findAll().spliterator(), false).collect(Collectors.toList());
+    @Override
+    public List<Application> findAllOrderByName(String sort, int page) {
+        List<Application> sortedApplications;
+
+        if (StringUtils.equalsIgnoreCase("asc", sort)) {
+            logger.info("Sorting applications by name Ascending");
+            sortedApplications = (repository.findAllByOrderByNameAsc(PageRequest.of(page,10)));
+        } else if (StringUtils.equalsIgnoreCase("desc", sort)) {
+            logger.info("Sorting applications by name  Descending");
+            sortedApplications = (repository.findAllByOrderByNameDesc(PageRequest.of(page,10)));
+        } else {
+            logger.info("Cannot obtain sorting param, getting unsorted applications");
+            sortedApplications = repository.findAll();
+        }
+        return sortedApplications;
+    }
+
+    @Override
+    public List<Application> findAllOrderByState(String sort, int page) {
+        List<Application> sortedApplications;
+        if (StringUtils.equalsIgnoreCase("asc", sort)) {
+            logger.info("Sorting applications by state Ascending");
+            sortedApplications = (repository.findAllByOrderByStateAsc(PageRequest.of(page,10)));
+        } else if (StringUtils.equalsIgnoreCase("desc", sort)) {
+            logger.info("Sorting applications by state  Descending");
+            sortedApplications = (repository.findAllByOrderByStateDesc(PageRequest.of(page,10)));
+        } else {
+            logger.info("Cannot obtain sorting param, getting unsorted applications");
+            sortedApplications = repository.findAll();
+        }
+        return sortedApplications;
     }
 
 
@@ -173,6 +206,6 @@ public class ApplicationServiceImpl implements ApplicationService {
                 logger.warn("Cannot publish application with id: {}, because it's not in state {}", id, ACCEPTED);
             }
         }
-        return false;    }
-
+        return false;
+    }
 }
