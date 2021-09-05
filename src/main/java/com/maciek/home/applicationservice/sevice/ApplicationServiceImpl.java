@@ -53,10 +53,10 @@ public class ApplicationServiceImpl implements ApplicationService {
 
         if (StringUtils.equalsIgnoreCase("asc", sort)) {
             logger.info("Sorting applications by name Ascending");
-            sortedApplications = (repository.findAllByOrderByNameAsc(PageRequest.of(page,10)));
+            sortedApplications = (repository.findAllByOrderByNameAsc(PageRequest.of(page, 10)));
         } else if (StringUtils.equalsIgnoreCase("desc", sort)) {
             logger.info("Sorting applications by name  Descending");
-            sortedApplications = (repository.findAllByOrderByNameDesc(PageRequest.of(page,10)));
+            sortedApplications = (repository.findAllByOrderByNameDesc(PageRequest.of(page, 10)));
         } else {
             logger.info("Cannot obtain sorting param, getting unsorted applications");
             sortedApplications = repository.findAll();
@@ -69,10 +69,10 @@ public class ApplicationServiceImpl implements ApplicationService {
         List<Application> sortedApplications;
         if (StringUtils.equalsIgnoreCase("asc", sort)) {
             logger.info("Sorting applications by state Ascending");
-            sortedApplications = (repository.findAllByOrderByStateAsc(PageRequest.of(page,10)));
+            sortedApplications = (repository.findAllByOrderByStateAsc(PageRequest.of(page, 10)));
         } else if (StringUtils.equalsIgnoreCase("desc", sort)) {
             logger.info("Sorting applications by state  Descending");
-            sortedApplications = (repository.findAllByOrderByStateDesc(PageRequest.of(page,10)));
+            sortedApplications = (repository.findAllByOrderByStateDesc(PageRequest.of(page, 10)));
         } else {
             logger.info("Cannot obtain sorting param, getting unsorted applications");
             sortedApplications = repository.findAll();
@@ -84,14 +84,15 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     public boolean createNew(Application newApplication) throws ServerException {
 
-        logger.info("Trying to post element with empty Name and Content");
-        if (newApplication != null) {
+
+        if (newApplication.getName() != null && !newApplication.getName()
+                .isBlank() && newApplication.getContent() != null && !newApplication.getContent().isBlank()) {
             repository.save(newApplication);
             logger.info("New application submitted: {}", newApplication);
             return true;
         } else {
-            logger.warn("Cannot create new application, because body is null");
-            throw new ServerException("New application is null");
+            logger.info("Trying to post element with empty Name and Content");
+            return false;
         }
     }
 
@@ -138,8 +139,6 @@ public class ApplicationServiceImpl implements ApplicationService {
         Optional<Application> optionalApplication = repository.findById(id);
         if (optionalApplication.isPresent()) {
             if (newApplication != null && newApplication.getRejectionReason() != null && !newApplication.getRejectionReason().isBlank()) {
-
-
                 Application application = optionalApplication.get();
                 State appState = application.getState();
                 if (appState.equals(VERIFIED) || appState.equals(ACCEPTED)) {

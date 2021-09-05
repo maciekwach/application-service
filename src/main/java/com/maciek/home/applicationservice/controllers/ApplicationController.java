@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.rmi.ServerException;
 import java.util.List;
 
+//@Slf4j
 @RestController
 @RequestMapping(value = "/applications")
 public class ApplicationController {
@@ -67,10 +68,13 @@ public class ApplicationController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Application> create(@RequestBody Application newApplication) throws ServerException {
-        logger.info("Creating new application: {}", newApplication);
-        if (service.createNew(newApplication)) {
-            return new ResponseEntity<>(newApplication, HttpStatus.OK);
+        if (newApplication != null) {
+            logger.info("Creating new application: {}", newApplication);
+            if (service.createNew(newApplication)) {
+                return new ResponseEntity<>(newApplication, HttpStatus.OK);
+            }
         }
+        logger.warn("Cannot create new application, because body is null");
         return ResponseEntity.noContent().build();
     }
 
@@ -109,7 +113,7 @@ public class ApplicationController {
     public ResponseEntity<Long> deleteById(@PathVariable long id) {
         logger.info("Trying to remove application with id: {}", id);
         if (service.deleteById(id)) {
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.ok().build();
         } else {
             return ResponseEntity.notFound().build();
         }

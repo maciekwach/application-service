@@ -5,3 +5,12 @@ spring:
   h2:
     console:
       enabled: true
+#  boot:
+#    enableautoconfiguration: false
+#
+#logging:
+#  level:
+#    org:
+#      springframework:
+#        boot:
+#          autoconfigure: ERROR
