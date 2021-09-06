@@ -26,12 +26,10 @@ import java.util.Objects;
 @Audited
 public class Application {
 
-
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    //    private final UUID uuid = UUID.randomUUID();
     private String name;
     private String content;
     @Enumerated
@@ -52,8 +50,4 @@ public class Application {
     public int hashCode() {
         return Objects.hash(id);
     }
-
-//    public boolean isEmpty() {
-//        return (this.content.isBlank() && this.name.isBlank()) || !this.rejectionReason.isBlank();
-//    }
 }

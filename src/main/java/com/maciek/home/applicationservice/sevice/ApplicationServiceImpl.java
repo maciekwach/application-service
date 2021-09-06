@@ -3,9 +3,8 @@ package com.maciek.home.applicationservice.sevice;
 import com.maciek.home.applicationservice.model.Application;
 import com.maciek.home.applicationservice.model.State;
 import com.maciek.home.applicationservice.repositories.ApplicationRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
@@ -20,11 +19,11 @@ import static com.maciek.home.applicationservice.model.State.PUBLISHED;
 import static com.maciek.home.applicationservice.model.State.REJECTED;
 import static com.maciek.home.applicationservice.model.State.VERIFIED;
 
+@Slf4j
 @Service
 public class ApplicationServiceImpl implements ApplicationService {
 
     private final ApplicationRepository repository;
-    private static final Logger logger = LoggerFactory.getLogger(ApplicationServiceImpl.class);
 
     public ApplicationServiceImpl(ApplicationRepository repository) {
         this.repository = repository;
@@ -32,14 +31,8 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     public Application findById(Long id) {
-
         Optional<Application> application = repository.findById(id);
-
-        if (application.isPresent()) {
-            return application.get();
-        }
-        //TODO: Create custom exception !
-        throw new RuntimeException("Cannot find application with id: " + id);
+        return application.orElse(null);
     }
 
     @Override
@@ -52,13 +45,13 @@ public class ApplicationServiceImpl implements ApplicationService {
         List<Application> sortedApplications;
 
         if (StringUtils.equalsIgnoreCase("asc", sort)) {
-            logger.info("Sorting applications by name Ascending");
+            log.info("Sorting applications by name Ascending");
             sortedApplications = (repository.findAllByOrderByNameAsc(PageRequest.of(page, 10)));
         } else if (StringUtils.equalsIgnoreCase("desc", sort)) {
-            logger.info("Sorting applications by name  Descending");
+            log.info("Sorting applications by name  Descending");
             sortedApplications = (repository.findAllByOrderByNameDesc(PageRequest.of(page, 10)));
         } else {
-            logger.info("Cannot obtain sorting param, getting unsorted applications");
+            log.info("Cannot obtain sorting param, getting unsorted applications");
             sortedApplications = repository.findAll();
         }
         return sortedApplications;
@@ -68,13 +61,13 @@ public class ApplicationServiceImpl implements ApplicationService {
     public List<Application> findAllOrderByState(String sort, int page) {
         List<Application> sortedApplications;
         if (StringUtils.equalsIgnoreCase("asc", sort)) {
-            logger.info("Sorting applications by state Ascending");
+            log.info("Sorting applications by state Ascending");
             sortedApplications = (repository.findAllByOrderByStateAsc(PageRequest.of(page, 10)));
         } else if (StringUtils.equalsIgnoreCase("desc", sort)) {
-            logger.info("Sorting applications by state  Descending");
+            log.info("Sorting applications by state  Descending");
             sortedApplications = (repository.findAllByOrderByStateDesc(PageRequest.of(page, 10)));
         } else {
-            logger.info("Cannot obtain sorting param, getting unsorted applications");
+            log.info("Cannot obtain sorting param, getting unsorted applications");
             sortedApplications = repository.findAll();
         }
         return sortedApplications;
@@ -84,14 +77,13 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     public boolean createNew(Application newApplication) throws ServerException {
 
-
         if (newApplication.getName() != null && !newApplication.getName()
                 .isBlank() && newApplication.getContent() != null && !newApplication.getContent().isBlank()) {
             repository.save(newApplication);
-            logger.info("New application submitted: {}", newApplication);
+            log.info("New application submitted: {}", newApplication);
             return true;
         } else {
-            logger.info("Trying to post element with empty Name and Content");
+            log.info("Trying to post element with empty Name and Content");
             return false;
         }
     }
@@ -105,7 +97,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                 repository.deleteById(id);
                 return true;
             } else {
-                logger.warn("Cannot remove application with id: {}, because it's in state: {}", id, appState);
+                log.warn("Cannot remove application with id: {}, because it's in state: {}", id, appState);
             }
         }
         return false;
@@ -128,7 +120,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                 repository.save(application);
                 return true;
             } else {
-                logger.warn("Cannot update application with id: {}, because it's in state: {}", id, appState);
+                log.warn("Cannot update application with id: {}, because it's in state: {}", id, appState);
             }
         }
         return false;
@@ -147,11 +139,11 @@ public class ApplicationServiceImpl implements ApplicationService {
                     repository.save(application);
                     return true;
                 } else {
-                    logger.warn("Cannot reject application with id: {}, because it's in state: {}", id, appState);
+                    log.warn("Cannot reject application with id: {}, because it's in state: {}", id, appState);
                     return false;
                 }
             } else {
-                logger.warn("Cannot reject application with id: {}, because Request body is empty", id);
+                log.warn("Cannot reject application with id: {}, because Request body is empty", id);
             }
         }
         return false;
@@ -168,7 +160,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                 repository.save(application);
                 return true;
             } else {
-                logger.warn("Cannot verify application with id: {}, because it's in state: {}", id, appState);
+                log.warn("Cannot verify application with id: {}, because it's in state: {}", id, appState);
             }
         }
         return false;
@@ -185,7 +177,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                 repository.save(application);
                 return true;
             } else {
-                logger.warn("Cannot accept application with id: {}, because it's not in state {}", id, VERIFIED);
+                log.warn("Cannot accept application with id: {}, because it's not in state {}", id, VERIFIED);
             }
         }
         return false;
@@ -202,7 +194,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                 repository.save(application);
                 return true;
             } else {
-                logger.warn("Cannot publish application with id: {}, because it's not in state {}", id, ACCEPTED);
+                log.warn("Cannot publish application with id: {}, because it's not in state {}", id, ACCEPTED);
             }
         }
         return false;
